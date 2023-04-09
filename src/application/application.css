@@ -1,0 +1,32 @@
+/* styles for the chat area */
+.chat-area {
+  -fx-font-size: 14px;
+}
+
+/* styles for the message field */
+.message-field {
+  -fx-pref-height: 50;
+  -fx-pref-width: 430;
+}
+
+/* styles for the send button */
+.send-button {
+  -fx-pref-height: 40;
+  -fx-pref-width: 80;
+}
+
+/* styles for the chat box */
+.chat-box {
+  -fx-padding: 10;
+  -fx-spacing: 10;
+}
+
+/* styles for the root BorderPane */
+.root {
+  -fx-background-color: white;
+}
+
+/* styles for the "Enter your user name" message */
+.server-message {
+  -fx-font-style: italic;
+}
