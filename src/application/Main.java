@@ -1,5 +1,9 @@
 package application;
+
+
+
 import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -25,40 +29,40 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            
-        	
-        	
-        	
+
+
+
+
             // Create the UI components
             BorderPane root = new BorderPane();
             chatArea = new TextArea();
             chatArea.setEditable(false);
             chatArea.getStyleClass().add("chat-area");
-            
+
             messageField = new TextField();
             messageField.getStyleClass().add("message-field");
             messageField.setPromptText(promptText);
-            
+
             // Create send Button
             sendButton = new Button("Send");
             sendButton.getStyleClass().add("send-button");
-            
+
 
             chatArea.appendText("@Server: Enter your username\n");
-            
+
             // Display the example chat messages in the chat area
             // TODO: Render all current chatMessages
             for (String message : chatMessages) {
                 chatArea.appendText(message);
             }
-            
-            
-          
+
+
+
 
             // Create the vertical layout for the chat box + Horizontal box
             VBox chatBox = new VBox(chatArea, new HBox(messageField, sendButton));
             chatBox.getStyleClass().add("chat-box");
-            
+
             // Set margin for the send button
             HBox.setMargin(sendButton, new Insets(0, 0, 0, 10));
 
@@ -87,13 +91,13 @@ public class Main extends Application {
                 sendMessage(messageField.getText());
                 messageField.clear();
             });
-            
-            
-            
+
+
+
             // TODO: Create a thread to hand incoming messages from server -> updateUI
             //updateChatBox(msg);
-            
-            
+
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,41 +109,41 @@ public class Main extends Application {
     	if (message.length() == 0) {
     		return;
     	}
-    	
-    
-    	
+
+
+
     	// TODO: Send the message to the server
-    	
+
     	// NOTE: Remove this. Demo ONLY
     	updateChatBox(message);
-    	
-    	
+
+
     	// Sign off
     	if (message.equals(".")) {
             signOff();
        	}
 
     }
-    
+
     private void updateChatBox(String message){
     	  // NOTE: Update the prompt message
         if (promptTextFlag){
         	promptText = "Enter your message here...\n";
         	messageField.setPromptText(promptText);
         }
-    	
+
         chatMessages.add(userName + ": " + message + "\n");
         chatArea.appendText(userName + ": " +  message + "\n");
-       
+
     }
-    
+
     private void signOff() {
     	messageField.setDisable(true);
     	sendButton.setDisable(true);
-    	
+
     	// TODO: send a sign off request and wait for server response 
     	chatArea.appendText("@Server: Goodbye!\n");
-    	
+
     }
 
     public static void main(String[] args) {
