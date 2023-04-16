@@ -19,10 +19,9 @@ public class ClientHandler {
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       this.username = bufferedReader.readLine();
       clientHandlers.add(this);
-      sendMessage(username + " has joined the chat");
-      
+      sendMessage(username + " has joined the chat");      
     } catch(IOException e) {
-      System.out.print("ERror");
+      System.out.print("Error");
     }
   }
 
