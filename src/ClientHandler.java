@@ -1,9 +1,8 @@
-
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ClientHandler {
+public class ClientHandler implements Runnable {
 
   public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
   private BufferedReader bufferedReader;
@@ -19,7 +18,7 @@ public class ClientHandler {
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       this.username = bufferedReader.readLine();
       clientHandlers.add(this);
-      sendMessage(username + " has joined the chat");      
+      sendMessage("@Server: " +username + " has joined the chat");      
     } catch(IOException e) {
       System.out.print("Error");
     }
@@ -36,6 +35,27 @@ public class ClientHandler {
       }catch(IOException e){
         System.out.print("error");
       }
+    }
+  }
+
+
+
+  @Override
+  public void run() {
+    String inputLine;
+    try {
+      while ((inputLine = bufferedReader.readLine()) != null) {
+        sendMessage(username + ": " + inputLine);
+      }
+
+      if (inputLine.equals(".")){
+        socket.close();
+        clientHandlers.remove(this);
+        sendMessage(username + " has left the chat");
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

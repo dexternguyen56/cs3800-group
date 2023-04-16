@@ -1,104 +1,144 @@
-
-import java.io.*; 
+import java.io.*;
 import java.net.*;
-import java.util.Scanner; 
+import java.util.Scanner;
+
+import javafx.stage.Stage;
+import javafx.application.Application;
+import javafx.application.Platform;
+
 public class Client {
     public static final String PORT_NUMBER = "1234";
-    public static final String HOST_NAME = "Hi";
+    public static final String HOST_NAME = "localhost";
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
     private boolean set;
+	private Main ui ;
 
-    public Client(Socket socket, String username){
+    public Client(String host, Integer port){
         try{
-            this.socket = socket;
+            this.socket = new Socket(host, port);;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.username = username;
+            this.username = "default-name";
             set = true;
+
+			// UI
+			ui = new Main();
+			Platform.startup(() -> {
+				ui.start(new Stage());
+			});
+	
         }
         catch(IOException e){
+			System.out.println("Unable to connect to server at " + host + ":" + port);
+            e.printStackTrace();
             close(socket, bufferedReader, bufferedWriter);
         }
     }
-    //Send a json to server with tag and message
-    public void sendMessage(String message, String tag) {
-    	try {
-    		bufferedWriter.write(username);
-    		bufferedWriter.newLine();
-    		bufferedWriter.flush();
-    		Scanner scan = new Scanner(System.in);
-    		
-    	}
-    	catch(IOException e) {
-    		close(socket, bufferedReader, bufferedWriter);
-    	}
-    }
-	public void sendMessage() {
-    	try {
-    		bufferedWriter.write(username);
-    		bufferedWriter.newLine();
-    		bufferedWriter.flush();
-    		Scanner scan = new Scanner(System.in);
-    		while(socket.isConnected()){
-				String messageToSend = scan.nextLine();
-				bufferedWriter.write(username + ": " + messageToSend);
-				bufferedWriter.newLine();
-				bufferedWriter.flush();
-			}
-    	}
-    	catch(IOException e) {
-    		close(socket, bufferedReader, bufferedWriter);
-    	}
+
+    // public void sendMessage(String message, String tag) {
+    //     try {
+    //         // bufferedWriter.write(username);
+    //         bufferedWriter.newLine();
+    //         bufferedWriter.flush();
+    //         while(socket.isConnected()){
+    //             bufferedWriter.write(message);
+    //             bufferedWriter.newLine();
+    //             bufferedWriter.flush();
+    //         }
+    //     }
+    //     catch(IOException e) {
+    //         close(socket, bufferedReader, bufferedWriter);
+    //     }
+    // }
+
+    public void sendMessage() {
+        try {
+            // bufferedWriter.write(username);
+            // bufferedWriter.newLine();
+            // bufferedWriter.flush();
+            while(socket.isConnected()){
+	
+				if(ui.getMessage().length() > 0)
+				{
+					System.out.println("message from UI: "+ ui.getMessage());
+					bufferedWriter.write(ui.getMessage());
+					bufferedWriter.newLine();
+					bufferedWriter.flush();
+                    ui.setMessage("");
+
+				}
+   
+            }
+        }
+        catch(IOException e) {
+            close(socket, bufferedReader, bufferedWriter);
+        }
     }
 
     public void listenToMessage() {
-    	new Thread(new Runnable() {
-    		@Override
-    		public void run() {
-    			String msgFromGroupChat;
-    
-    		 while(socket.isConnected()) {
-    			 	try {
-    			 		msgFromGroupChat = bufferedReader.readLine();
-    			 		//Makes UI update to have the chat
-						System.out.println(msgFromGroupChat);
-    			 	}
-    			 	catch(IOException e) {
-    			 		close(socket, bufferedReader, bufferedWriter);
-    			 	}
-    		 }
-    		}
-    	}).start();
+        String msgFromGroupChat;
+        try {
+            while(socket.isConnected()) {
+                if(bufferedReader.ready()) {
+                    msgFromGroupChat = bufferedReader.readLine();
+					ui.updateChatBox(msgFromGroupChat);
+                }
+            }
+        }
+        catch(IOException e) {
+            close(socket, bufferedReader, bufferedWriter);
+        }
     }
-    public void broadcastMessage() {
+
+    public void start() {
+        Thread sendMessageThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage();
+            }
+        });  
+		
+
+		Thread listenToMessageThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                listenToMessage();
+            }
+        }); 
+
+   		sendMessageThread.start();
+        listenToMessageThread.start();
+
+		// sendMessage();
+		// listenToMessage();
+
     }
-    	
+
     public void close(Socket socket, BufferedReader reader, BufferedWriter writer){
-    	try {
-    		if(bufferedReader != null) {
-    			bufferedReader.close();
-    		}
-    		if(bufferedWriter != null) {
-    			bufferedWriter.close();
-    		}
-    		if(socket != null) {
-    			socket.close();
-    		}
-    	}
-    		catch(IOException e) {
-    			e.printStackTrace();
-    		}
-    	}
-    	public static void main(String[] args) throws IOException{
-			Scanner scan = new Scanner(System.in);
-			System.out.println("Enter Username: ");
-			String username = scan.nextLine();
-			Socket socket = new Socket("localhost", 1234);
-			Client client = new Client(socket, username);
-			client.listenToMessage();
-			client.sendMessage();
-		}
+        try {
+            if(bufferedReader != null) {
+                bufferedReader.close();
+            }
+            if(bufferedWriter != null) {
+                bufferedWriter.close();
+            }
+            if(socket != null) {
+                socket.close();
+            }
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    public static void main(String[] args) throws IOException{
+
+		Client client = new Client("localhost", 1234);
+        client.start();
+
+
+    }
+}

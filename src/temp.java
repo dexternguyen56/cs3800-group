@@ -3,7 +3,6 @@
 import java.util.ArrayList;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,13 +14,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class temp extends Application {
 
     private TextArea chatArea;
     private ArrayList<String> chatMessages = new ArrayList<>();
     private boolean promptTextFlag = false;
     TextField messageField; 
-    String message ="";
     Button sendButton ;
     String userName = "Client";
     String promptText = "Enter your message here...";
@@ -29,6 +27,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+
+
 
 
             // Create the UI components
@@ -79,24 +79,15 @@ public class Main extends Application {
             // Event handler for messageField to handle the Enter key
             messageField.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.ENTER) {
-                    setMessage(messageField.getText());
-                    Platform.runLater(() -> {
-                     
-                        messageField.clear();
-                    });
-                    
-                   
+                    sendMessage(messageField.getText());
+                    messageField.clear();
                 }
             });
 
             // Event handler for sendButton 
             sendButton.setOnAction(event -> {
-
-                setMessage(messageField.getText());
-                Platform.runLater(() -> {
-                    messageField.clear();
-                });
-                
+                sendMessage(messageField.getText());
+                messageField.clear();
             });
 
 
@@ -112,34 +103,39 @@ public class Main extends Application {
     }
 
 
-    public synchronized String getMessage() {
-        return message;
+    private void sendMessage(String message) {
+    	if (message.length() == 0) {
+    		return;
+    	}
+
+
+
+    	// TODO: Send the message to the server
+
+    	// NOTE: Remove this. Demo ONLY
+    	updateChatBox(message);
+
+
+    	// Sign off
+    	if (message.equals(".")) {
+            signOff();
+       	}
+
     }
 
-    public synchronized void setMessage(String msg){
-
-        
-        message = msg;
-        System.out.println("set: " + message);
-
-    }
-
-    public void updateChatBox(String message){
+    private void updateChatBox(String message){
     	  // NOTE: Update the prompt message
         if (promptTextFlag){
         	promptText = "Enter your message here...\n";
         	messageField.setPromptText(promptText);
         }
 
-        chatMessages.add(message + "\n");
-
-        Platform.runLater(() -> {
-            chatArea.appendText(message + "\n");
-        });
+        chatMessages.add(userName + ": " + message + "\n");
+        chatArea.appendText(userName + ": " +  message + "\n");
 
     }
 
-    public void signOff() {
+    private void signOff() {
     	messageField.setDisable(true);
     	sendButton.setDisable(true);
 
@@ -148,9 +144,7 @@ public class Main extends Application {
 
     }
 
-    // public static void main(String[] args) {
-        
-       
-    //     launch(args);
-    // }
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
