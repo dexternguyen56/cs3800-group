@@ -27,8 +27,7 @@ hs_err_pid*
 .classpath
 
 .project
-.settings/
+/.settings/
 /bin/
-.settings
-module-info.java
-build.fxbuild
+/.vscode/
+/lib/
