@@ -1,3 +1,4 @@
+package application;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,10 +16,6 @@ public class Server{
         Socket socket = serverSocket.accept();
         System.out.println("A new user has joined");
         ClientHandler clientHandler = new ClientHandler(socket);
-
-        
-
-        
       }
     } catch(IOException e){
       

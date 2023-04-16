@@ -1,6 +1,7 @@
 package application;
 import java.io.*; 
-import java.net.*; 
+import java.net.*;
+import java.util.Scanner; 
 public class Client {
     public static final String PORT_NUMBER = "1234";
     public static final String HOST_NAME = "Hi";
@@ -28,7 +29,25 @@ public class Client {
     		bufferedWriter.write(username);
     		bufferedWriter.newLine();
     		bufferedWriter.flush();
-    		//Send message to UI
+    		Scanner scan = new Scanner(System.in);
+    		
+    	}
+    	catch(IOException e) {
+    		close(socket, bufferedReader, bufferedWriter);
+    	}
+    }
+	public void sendMessage() {
+    	try {
+    		bufferedWriter.write(username);
+    		bufferedWriter.newLine();
+    		bufferedWriter.flush();
+    		Scanner scan = new Scanner(System.in);
+    		while(socket.isConnected()){
+				String messageToSend = scan.nextLine();
+				bufferedWriter.write(username + ": " + messageToSend);
+				bufferedWriter.newLine();
+				bufferedWriter.flush();
+			}
     	}
     	catch(IOException e) {
     		close(socket, bufferedReader, bufferedWriter);
@@ -45,6 +64,7 @@ public class Client {
     			 	try {
     			 		msgFromGroupChat = bufferedReader.readLine();
     			 		//Makes UI update to have the chat
+						System.out.println(msgFromGroupChat);
     			 	}
     			 	catch(IOException e) {
     			 		close(socket, bufferedReader, bufferedWriter);
@@ -72,5 +92,13 @@ public class Client {
     			e.printStackTrace();
     		}
     	}
-    	
+    	public static void main(String[] args) throws IOException{
+			Scanner scan = new Scanner(System.in);
+			System.out.println("Enter Username: ");
+			String username = scan.nextLine();
+			Socket socket = new Socket("localhost", 1234);
+			Client client = new Client(socket, username);
+			client.listenToMessage();
+			client.sendMessage();
+		}
     }
