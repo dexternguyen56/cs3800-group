@@ -31,7 +31,7 @@ public class ClientHandler {
         clientHandler.bufferedWriter.write(message);
         clientHandler.bufferedWriter.newLine();
         clienthandler.bufferedWriter.flush();
-      }except(IOException e){
+      }catch(IOException e){
         System.out.print("error");
       }
     }
