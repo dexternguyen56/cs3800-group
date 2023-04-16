@@ -2,11 +2,11 @@ package application;
 import java.io.*; 
 import java.net.*; 
 public class Client {
-    public static final String PORT_NUMBER = "80";
+    public static final String PORT_NUMBER = "1234";
     public static final String HOST_NAME = "Hi";
     private Socket socket;
     private BufferedReader bufferedReader;
-    private BufferedReader bufferedWriter;
+    private BufferedWriter bufferedWriter;
     private String username;
     private boolean set;
 
@@ -24,11 +24,15 @@ public class Client {
     }
     //Send a json to server with tag and message
     public void sendMessage(String message, String tag) {
+    	try {
     		bufferedWriter.write(username);
     		bufferedWriter.newLine();
     		bufferedWriter.flush();
     		//Send message to UI
-    		
+    	}
+    	catch(IOException e) {
+    		close(socket, bufferedReader, bufferedWriter);
+    	}
     }
 
     public void listenToMessage() {
