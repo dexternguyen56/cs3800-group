@@ -20,21 +20,24 @@ public class ClientHandler {
       clientHandlers.add(this);
       sendMessage(username + " has joined the chat");
       
-    } catch(Exception e) {
+    } catch(IOException e) {
       System.out.print("ERror");
     }
   }
 
-   public void sendMessage(String message){
+
+
+  public void sendMessage(String message){
     for (ClientHandler clientHandler: clientHandlers){
       try{
         clientHandler.bufferedWriter.write(message);
         clientHandler.bufferedWriter.newLine();
-        clienthandler.bufferedWriter.flush();
+        clientHandler.bufferedWriter.flush();
       }catch(IOException e){
         System.out.print("error");
       }
     }
   }
+
   
 }
