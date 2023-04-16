@@ -1,9 +1,8 @@
-import java.io.BufferedReader;
+import java.io.*;
 import java.net.Socket;
-import java.io.BufferedWriter;
 import java.util.ArrayList;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler {
 
   public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
   private BufferedReader bufferedReader;
@@ -19,8 +18,10 @@ public class ClientHandler implements Runnable {
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       this.username = bufferedReader.readLine();
       clientHandlers.add(this);
-      sendMessage(username + " has joined the chat");
+      //sendMessage(username + " has joined the chat");
       
+    } catch(Exception e) {
+      System.out.print("ERror");
     }
   }
 
