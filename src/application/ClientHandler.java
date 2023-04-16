@@ -18,12 +18,23 @@ public class ClientHandler {
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       this.username = bufferedReader.readLine();
       clientHandlers.add(this);
-      //sendMessage(username + " has joined the chat");
+      sendMessage(username + " has joined the chat");
       
     } catch(Exception e) {
       System.out.print("ERror");
     }
   }
 
+   public void sendMessage(String message){
+    for (ClientHandler clientHandler: clientHandlers){
+      try{
+        clientHandler.bufferedWriter.write(message);
+        clientHandler.bufferedWriter.newLine();
+        clienthandler.bufferedWriter.flush();
+      }except(IOException e){
+        System.out.print("error");
+      }
+    }
+  }
   
 }
