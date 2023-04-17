@@ -88,14 +88,21 @@ public class Main extends Application {
       initializeClient(HOST_NAME, PORT_NUMBER);
       startClient();
 
+
+      // Event for chatArea
+      chatArea.textProperty().addListener((observable, oldText, newText) -> {
+        if(userName != null){
+          String title = userName.replace("[", "").replace("]", "");
+          primaryStage.setTitle(title);
+        }
+      
+    });
+
       // Event handler for messageField to handle the Enter key
       messageField.setOnKeyPressed(event -> {
         if (event.getCode() == KeyCode.ENTER) {
           sendMessage(messageField.getText(), "tag");
           Platform.runLater(() -> {
-            if(userName != null){
-              primaryStage.setTitle(userName);
-            }
             messageField.clear();
           });
         }
@@ -105,9 +112,6 @@ public class Main extends Application {
       sendButton.setOnAction(event -> {
         sendMessage(messageField.getText(), "tag");
         Platform.runLater(() -> {
-          if(userName != null){
-            primaryStage.setTitle(userName);
-          }
           messageField.clear();
         });
       });
@@ -142,6 +146,7 @@ public class Main extends Application {
         new BufferedReader(new InputStreamReader(socket.getInputStream()));
     } catch (IOException e) {
       System.out.println("Unable to connect to server at " + host + ":" + port);
+      updateChatBox("Unable to connect to server!");
       e.printStackTrace();
       close();
     }
