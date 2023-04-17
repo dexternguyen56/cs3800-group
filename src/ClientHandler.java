@@ -1,8 +1,10 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ClientHandler implements Runnable {
 
@@ -27,7 +29,7 @@ public class ClientHandler implements Runnable {
       this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-      sendMessage(payload("username", "@Server: Enter your username" , "a"));
+      sendMessage(payload("username", "@Server: Enter your username" , getTime()));
           
     } catch(IOException e) {
       close();
@@ -56,7 +58,7 @@ public class ClientHandler implements Runnable {
             if (bufferedReader.ready()) {
 
                 msgFromClient = bufferedReader.readLine();
-                System.out.println(msgFromClient);
+                System.out.println("Request: " +msgFromClient);
 
                 if (username != null){
                   msgList.add(msgFromClient + "," + username);
@@ -76,6 +78,7 @@ public class ClientHandler implements Runnable {
 
     String tag = fields[0];
     String msg = fields[1];
+    String time = fields[2];
 
     if(tag.equals("username")){
       
@@ -83,16 +86,26 @@ public class ClientHandler implements Runnable {
         username = msg;
         userMap.put(username, this);
 
-        sendMessage(payload("username", msg , "a"));
-        msgList.add(payload("message", "@Server: " + username + " has join the chat!", "a") +  "," + username);
+        sendMessage(payload("username", msg , time));
+        msgList.add(payload("message", "@Server: " + username + " has join the chat!", time) +  "," + username);
 
       }
       else{
-        sendMessage(payload("username", "@Server: Enter a different username" , "a"));
+        sendMessage(payload("username", "@Server: Enter a different username" , getTime()));
       }
 
     }
 
+  }
+
+
+  public String getTime() {
+    LocalDateTime now = LocalDateTime.now();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+      "[hh:mm:ss a]"
+    );
+
+    return "["+ now.format(formatter) +"] ";
   }
 
   

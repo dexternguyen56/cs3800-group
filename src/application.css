@@ -1,32 +1,85 @@
+
+
 /* styles for the chat area */
 .chat-area {
-  -fx-font-size: 14px;
+  -fx-font-size: 12px;
+  -fx-focus-color: #FFE5D9;
+
 }
+
 
 /* styles for the message field */
 .message-field {
   -fx-pref-height: 50;
   -fx-pref-width: 430;
+  -fx-focus-color: #fab481;
+
+
+   /* Remove focus border */
+}
+
+.message-field:focused {
+  -fx-background-insets: 0;
+  -fx-background-radius: 5;
+  -fx-border-color: #FEC89A;
+  -fx-border-radius: 5;
+
 }
 
 /* styles for the send button */
 .send-button {
   -fx-pref-height: 40;
   -fx-pref-width: 80;
+  -fx-background-color: #FEC89A;
+  -fx-background-radius: 15;
+  -fx-border-radius: 15;
+  -fx-border-width: 2;
+  -fx-border-color: #FEC89A;
+  -fx-font-size: 14;
+  -fx-font-weight: bold;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);
+  -fx-text-fill: #FFFFFF;
+  -fx-padding: 0;
+}
+
+.send-button .text {
+  -fx-fill: #FFFFFF;
+  -fx-stroke: #fab481;
+  -fx-stroke-width: 0.2px;
+}
+
+.send-button:hover {
+  -fx-background-color: #FFD7BA;
+  -fx-border-color: #FFD7BA;
+}
+
+.send-button:pressed {
+  -fx-background-color: #FAE1DD;
+  -fx-border-color: #FAE1DD;
 }
 
 /* styles for the chat box */
 .chat-box {
   -fx-padding: 10;
   -fx-spacing: 10;
+  -fx-background-color: #FFE5D9;
+
+
 }
 
 /* styles for the root BorderPane */
 .root {
-  -fx-background-color: white;
+  -fx-background-color: #FFE5D9;
+}
+
+/* styles for the title bar */
+.root .title-bar {
+  -fx-background-color: #FEC89A; /* new background color for the title bar */
+  -fx-background-radius: 0; /* remove rounded corners */
 }
 
 /* styles for the "Enter your user name" message */
 .server-message {
   -fx-font-style: italic;
+  -fx-text-fill: #FEC89A;
 }

@@ -1,13 +1,15 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 public class Server {
   private ServerSocket serverSocket;
@@ -59,7 +61,6 @@ public class Server {
         while(!synchronizedList.isEmpty()) {
             String request = synchronizedList.remove(0);
 
-            System.out.println("Sending message!");
             String fields[] = request.split(",");
             String tag = fields[0];
             String msg = fields[1];
@@ -68,14 +69,15 @@ public class Server {
 
             if (tag.equals("message") ){
               String response = msg.contains("@Server") ? msg : username +": " + msg;
-              broadCast(payload("message", response, "a"));
+              broadCast(payload("message", response, time));
 
             }
             else if(tag.equals("disconnect")){
-              synchronizedMap.get(username).sendMessage(payload("disconnect", "@Server: Goodbye!" , "a"));
+              String leftTime = getTime();
+              synchronizedMap.get(username).sendMessage(payload("disconnect", "@Server: Goodbye!" , leftTime));
               synchronizedMap.get(username).close();
               synchronizedMap.remove(username);
-              broadCast(payload("message","@Server: " + username + " has left the chat!", "a"));
+              broadCast(payload("message","@Server: " + username + " has left the chat!", leftTime));
              
             }
 
@@ -104,6 +106,15 @@ public class Server {
     } catch(IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public String getTime() {
+    LocalDateTime now = LocalDateTime.now();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+      "[hh:mm:ss a]"
+    );
+
+    return "["+ now.format(formatter) +"] ";
   }
 
   public static void main(String[] args) {
