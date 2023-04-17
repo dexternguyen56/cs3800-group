@@ -1,28 +1,27 @@
-import java.io.*;
-import java.net.*;
-import java.util.Scanner;
-
-import javafx.stage.Stage;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.stage.Stage;
 
-public class Client {
+public class Client extends Application {
 
+    private int numWindows = 3;
 
-    public static void main(String[] args) throws IOException{
+    @Override
+    public void start(Stage primaryStage) throws Exception {
 
-		// Client client = new Client("localhost", 1234);
-        // client.start();
+        for (int i = 0; i < numWindows; i++) {
+            Platform.runLater(() -> {
+                Main ui = new Main();
+                try {
+                    ui.start(new Stage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
 
-		for (int i = 0; i < 3; i++) {
-			Main ui = new Main();
-
-			Platform.startup(() -> {
-           		ui.start(new Stage());
-        	});
-			
-		}
-
-
+    public static void main(String[] args) {
+        launch(args);
     }
 }
