@@ -83,7 +83,6 @@ public class ClientHandler implements Runnable {
         username = msg;
         userMap.put(username, this);
 
-
         sendMessage(payload("username", msg , "a"));
         msgList.add(payload("message", "@Server: " + username + " has join the chat!", "a") +  "," + username);
 
