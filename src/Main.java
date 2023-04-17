@@ -1,6 +1,15 @@
 
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.ArrayList;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -15,6 +24,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+
 public class Main extends Application {
 
     private TextArea chatArea;
@@ -23,13 +33,26 @@ public class Main extends Application {
     TextField messageField; 
     String message ="";
     Button sendButton ;
-    String userName = "Client";
+    String userName;
     String promptText = "Enter your message here...";
+
+    private Stage localStage;
+
+
+
+    public static final Integer PORT_NUMBER = 1234;
+    public static final String HOST_NAME = "localhost";
+    private Socket socket;
+    private BufferedReader bufferedReader;
+    private BufferedWriter bufferedWriter;
+
+
 
     @Override
     public void start(Stage primaryStage) {
         try {
 
+            localStage = primaryStage;
 
             // Create the UI components
             BorderPane root = new BorderPane();
@@ -46,17 +69,13 @@ public class Main extends Application {
             sendButton.getStyleClass().add("send-button");
 
 
-            chatArea.appendText("@Server: Enter your username\n");
+            // chatArea.appendText("@Server: Enter your username\n");
 
             // Display the example chat messages in the chat area
-            // TODO: Render all current chatMessages
-            for (String message : chatMessages) {
-                chatArea.appendText(message);
-            }
-
-
-
-
+            // for (String message : chatMessages) {
+            //     chatArea.appendText(message);
+            // }       
+ 
             // Create the vertical layout for the chat box + Horizontal box
             VBox chatBox = new VBox(chatArea, new HBox(messageField, sendButton));
             chatBox.getStyleClass().add("chat-box");
@@ -73,13 +92,21 @@ public class Main extends Application {
             scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
             primaryStage.setScene(scene);
-            primaryStage.setTitle(userName);
+            primaryStage.setTitle("Client");
             primaryStage.show();
+
+
+
+            // Start the socket
+            initializeClient(HOST_NAME, PORT_NUMBER);
+            startClient();
+            
+
 
             // Event handler for messageField to handle the Enter key
             messageField.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.ENTER) {
-                    setMessage(messageField.getText());
+                    sendMessage(messageField.getText(), "tag");
                     Platform.runLater(() -> {
                      
                         messageField.clear();
@@ -91,8 +118,7 @@ public class Main extends Application {
 
             // Event handler for sendButton 
             sendButton.setOnAction(event -> {
-
-                setMessage(messageField.getText());
+                sendMessage(messageField.getText(), "tag");
                 Platform.runLater(() -> {
                     messageField.clear();
                 });
@@ -101,38 +127,20 @@ public class Main extends Application {
 
 
 
-            // TODO: Create a thread to hand incoming messages from server -> updateUI
-            //updateChatBox(msg);
-
-
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    
 
-    public synchronized String getMessage() {
-        return message;
-    }
-
-    public synchronized void setMessage(String msg){
-
-        
-        message = msg;
-        System.out.println("set: " + message);
-
-    }
-
-    public void updateChatBox(String message){
+    private void updateChatBox(String message){
     	  // NOTE: Update the prompt message
         if (promptTextFlag){
         	promptText = "Enter your message here...\n";
         	messageField.setPromptText(promptText);
         }
-
-        chatMessages.add(message + "\n");
-
         Platform.runLater(() -> {
             chatArea.appendText(message + "\n");
         });
@@ -143,14 +151,155 @@ public class Main extends Application {
     	messageField.setDisable(true);
     	sendButton.setDisable(true);
 
-    	// TODO: send a sign off request and wait for server response 
-    	chatArea.appendText("@Server: Goodbye!\n");
+    	// // TODO: send a sign off request and wait for server response 
+    	// chatArea.appendText("@Server: Goodbye!\n");
 
     }
 
-    // public static void main(String[] args) {
+
+    //Client
+
+
+    private void initializeClient(String host, Integer port){
+        try{
+            this.socket = new Socket(host, port);;
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        }
+        catch(IOException e){
+			System.out.println("Unable to connect to server at " + host + ":" + port);
+            e.printStackTrace();
+            close();
+        }
+    }
+
+    public void sendMessage(String message, String tag) {
+        String response;
+        try {
+            if (socket.isConnected()){
+				if(message.length() > 0)
+				{
+                    if (message.equals(".")){
+                        tag = "disconnect";
+                        
+                    }
+                    else{
+
+                        tag = (userName == null) ?  "username" : "message";
+                        
+
+                    }
+
+                    System.out.println("userName " + userName);
+
+                    response = payload(tag, message, getTime());
+
+
+
+					bufferedWriter.write(response);
+					bufferedWriter.newLine();
+					bufferedWriter.flush();
+				}
+   
+            }
+        }
+        catch(IOException e) {
+            close();
+        }
+    }
+
+    public void listenToMessage(TextArea screen) {
+        String msgFromGroupChat = ""; 
+        try {
+            while (socket.isConnected()) {
+                if (bufferedReader.ready()) {
+                    msgFromGroupChat = bufferedReader.readLine();
         
+                    processResponse(msgFromGroupChat);
+                }
+            }
+        } catch (IOException e) {
+            close();
+        }
+    }
+
+    private void processResponse(String response){
+        System.out.println("Response: " + response);
+        
+        String fields[] = response.split(",");
+
+        String tag = fields[0];
+        String msg = fields[1];
+        String time = fields[2];
+
        
-    //     launch(args);
-    // }
+
+        if(tag.equals("disconnect")){
+            updateChatBox(msg);  
+            signOff();
+            close();
+        }
+        else if (tag.equals("username")){
+            if(!msg.contains("@Server")){
+                userName  = msg;
+   
+                
+            } 
+            else{
+
+                updateChatBox(msg);     
+            }
+        }
+        else{
+            updateChatBox(msg);
+        }
+    }
+
+    public void startClient() {
+		Thread listenToMessageThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                listenToMessage(chatArea);
+            }
+        }); 
+        listenToMessageThread.start();
+    }
+
+
+    public void close(){
+        try {
+            if(bufferedReader != null) {
+                bufferedReader.close();
+            }
+            if(bufferedWriter != null) {
+                bufferedWriter.close();
+            }
+            if(socket != null) {
+                socket.close();
+            }
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String payload(String tag, String msg, String time ){
+        String []response = {tag,msg,time};
+
+        return String.join(",", response);
+        
+    }
+
+    public String getTime(){
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        
+        return now.format(formatter);
+    }
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
