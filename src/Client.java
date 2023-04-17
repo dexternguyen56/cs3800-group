@@ -20,7 +20,7 @@ public class Client extends Application {
             });
         }
     }
-
+	// Add path to VM args 
     public static void main(String[] args) {
         launch(args);
     }
