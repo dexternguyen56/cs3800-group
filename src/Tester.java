@@ -2,7 +2,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-public class Client extends Application {
+public class Tester extends Application {
 
     private int numWindows = 3;
 
