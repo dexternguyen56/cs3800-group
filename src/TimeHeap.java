@@ -14,7 +14,7 @@ public class TimeHeap {
         if (timeData != null) {
             return timeData.getData();
         } else {
-            return null; // or throw an exception or return a default value, depending on your use case
+            return null; 
         }
     }
 
@@ -27,8 +27,6 @@ public class TimeHeap {
     public synchronized int size() {
         return priorityQueue.size();
     }
-
-    // Other methods for manipulating the synchronized priority queue as needed
 
     // Internal class to represent an item in the priority queue with LocalDateTime and associated data
     private static class TimeData implements Comparable<TimeData> {
