@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.sql.Time;
 import java.util.List;
 import java.util.Map;
 
@@ -15,15 +16,15 @@ public class ClientHandler implements Runnable {
   private String username;
 
   private Socket socket;
-  private List msgList;
+  private TimeHeap timeHeap;
   private Map userMap;
   private String request;
 
   
-  public ClientHandler (Socket socket, List msgList,  Map userName){
+  public ClientHandler (Socket socket, TimeHeap timeHeap,  Map userName){
     try{
       this.socket = socket;
-      this.msgList = msgList;
+      this.timeHeap = timeHeap;
       this.userMap = userName;
 
       this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -61,7 +62,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("Request: " +msgFromClient);
 
                 if (username != null){
-                  msgList.add(msgFromClient + "," + username);
+                  timeHeap.addToQueue(LocalDateTime.now(), (msgFromClient + "," + username));;
                 }
                 else{
                   processUsername(msgFromClient); 
@@ -87,7 +88,8 @@ public class ClientHandler implements Runnable {
         userMap.put(username, this);
 
         sendMessage(payload("username", msg , time));
-        msgList.add(payload("message", "@Server: " + username + " has join the chat!", time) +  "," + username);
+        timeHeap.addToQueue(LocalDateTime.now(), payload("message", "@Server: " + username + " has join the chat!", time) +  "," + username);;
+
 
       }
       else{
