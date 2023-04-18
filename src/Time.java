@@ -14,8 +14,22 @@ public class Time implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'compareTo'");
+        int difference = (this.time).compareTo(o.time);
+        if (difference > 0) {
+ 
+            // current object is greater
+            return 1;
+        }
+        else if (diff < 0) {
+ 
+            // compared object is greater
+            return -1;
+        }
+        else {
+ 
+            // objects are equal
+            return 0;
+        }
     }
 
 }
