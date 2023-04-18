@@ -9,11 +9,14 @@ import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+
+
 
 public class Server {
   private ServerSocket serverSocket;
 
-  List<String> synchronizedList = Collections.synchronizedList(new ArrayList<String>());
+  TimeHeap synchronizedList = new TimeHeap();
 
   // Creating synchronized hashmap
   Map<String, ClientHandler> synchronizedMap = Collections.synchronizedMap(new HashMap<String, ClientHandler>());
@@ -52,7 +55,7 @@ public class Server {
 
     synchronized (synchronizedList) {
       while (!synchronizedList.isEmpty()) {
-        String request = synchronizedList.remove(0);
+        String request = synchronizedList.removeFromQueue().getData();
 
         String fields[] = request.split(",");
         String tag = fields[0];
