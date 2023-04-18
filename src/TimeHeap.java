@@ -9,9 +9,13 @@ public class TimeHeap {
         priorityQueue.add(new TimeData(localDateTime, data));
     }
 
-    // Remove and return the highest-priority LocalDateTime object from the synchronized priority queue
-    public synchronized TimeData removeFromQueue() {
-        return priorityQueue.poll();
+    public synchronized String removeFromQueue() {
+        TimeData timeData = priorityQueue.poll();
+        if (timeData != null) {
+            return timeData.getData();
+        } else {
+            return null; // or throw an exception or return a default value, depending on your use case
+        }
     }
 
     // Check if the synchronized priority queue is empty
@@ -46,9 +50,7 @@ public class TimeHeap {
 
         @Override
         public int compareTo(TimeData other) {
-            return localDateTime.compareTo(other.getLocalDateTime());
+            return this.localDateTime.compareTo(other.getLocalDateTime()); // Compare based on LocalDateTime
         }
     }
 }
-
-//

@@ -60,6 +60,8 @@ public class Server {
         String time = fields[2];
         String username = fields[3];
 
+        
+
         if (tag.equals("message")) {
           String response = msg.contains("@Server") ? msg : username + ": " + msg;
           broadCast(payload("message", response, time));

@@ -15,7 +15,7 @@ public class ClientHandler implements Runnable {
   private String username;
 
   private Socket socket;
-  private List msgList;
+  private List msgList; 
   private Map userMap;
   private String request;
 
