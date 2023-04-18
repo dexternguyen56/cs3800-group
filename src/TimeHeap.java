@@ -10,8 +10,8 @@ public class TimeHeap {
     }
 
     // Remove and return the highest-priority LocalDateTime object from the synchronized priority queue
-    public synchronized LocalDateTime removeFromQueue() {
-        return priorityQueue.poll().getLocalDateTime();
+    public synchronized TimeData removeFromQueue() {
+        return priorityQueue.poll();
     }
 
     // Check if the synchronized priority queue is empty
