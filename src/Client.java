@@ -18,7 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Client extends Application {
 
   private TextArea chatArea;
   private ArrayList<String> chatMessages = new ArrayList<>();
@@ -38,11 +38,11 @@ public class Main extends Application {
   private BufferedReader bufferedReader;
   private BufferedWriter bufferedWriter;
 
-  public Main(String name) {
+  public Client(String name) {
     demoName = name;
   }
 
-  public Main() {}
+  public Client() {}
 
   public void demoName() {
     sendMessage(demoName, "");

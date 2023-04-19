@@ -4,19 +4,19 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-public class Tester extends Application {
+public class ClientTest extends Application {
 
   private static int numWindows = 3;
   private final String[] names = { "Bob", "Derek", "Regan" };
 
-  private static ArrayList<Main> uiClients = new ArrayList<>();
+  private static ArrayList<Client> uiClients = new ArrayList<>();
 
   @Override
   public void start(Stage primaryStage) throws Exception {
     for (int i = 0; i < numWindows; i++) {
       final int index = i;
       Platform.runLater(() -> {
-        Main ui = new Main(names[index]);
+        Client ui = new Client(names[index]);
         uiClients.add(ui);
         try {
           ui.start(new Stage());
