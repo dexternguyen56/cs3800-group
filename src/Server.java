@@ -1,24 +1,17 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-
-import java.util.List;
 import java.util.Map;
 
 public class Server {
   private ServerSocket serverSocket;
 
-  //List<String> messageHeap = Collections.messageHeap(new ArrayList<String>());
-
   TimeHeap messageHeap = new TimeHeap();
 
   // Creating synchronized hashmap
-  Map<String, ClientHandler> synchronizedMap = Collections.synchronizedMap(new HashMap<String, ClientHandler>());
+  Map<String, ClientSocket> synchronizedMap = Collections.synchronizedMap(new HashMap<String, ClientSocket>());
 
   public Server(ServerSocket serverSocket) {
     this.serverSocket = serverSocket;
@@ -30,8 +23,8 @@ public class Server {
         Socket socket = serverSocket.accept();
         System.out.println("A new user has joined");
 
-        ClientHandler clientHandler = new ClientHandler(socket, messageHeap, synchronizedMap);
-        Thread thread = new Thread(clientHandler);
+        ClientSocket ClientSocket = new ClientSocket(socket, messageHeap, synchronizedMap);
+        Thread thread = new Thread(ClientSocket);
         thread.start();
 
       }
@@ -41,12 +34,12 @@ public class Server {
   }
 
   public void broadCast(String msg) {
-    // Iterate over the entries
-    for (Map.Entry<String, ClientHandler> entry : synchronizedMap.entrySet()) {
-      String name = entry.getKey();
-      ClientHandler client = entry.getValue();
+    // Iterate over the entries and send the msg to all user
+    for (Map.Entry<String, ClientSocket> entry : synchronizedMap.entrySet()) {
+      String user = entry.getKey();
+      ClientSocket client = entry.getValue();
       client.sendMessage(msg);
-      // ...
+      
     }
   }
 
