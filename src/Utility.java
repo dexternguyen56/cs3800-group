@@ -27,7 +27,7 @@ public class Utility {
     public static String formatTime(LocalDateTime time) {
        
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-        "[hh:mm:ss a]"
+            "[hh:mm:ss.SSS a]"
         );
 
         return "["+ time.format(formatter) +"] ";

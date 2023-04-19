@@ -29,22 +29,21 @@ public class Server {
 
       }
     } catch (IOException e) {
-
+      // Exception handling for IO errors
+      e.printStackTrace();
     }
   }
 
   public void broadCast(String msg) {
-    // Iterate over the entries and send the msg to all user
+    // Iterate over the entries and send the msg to all users
     for (Map.Entry<String, ClientSocket> entry : synchronizedMap.entrySet()) {
       String user = entry.getKey();
       ClientSocket client = entry.getValue();
       client.sendMessage(msg);
-      
     }
   }
 
   public void processResponse() {
-
     synchronized (messageHeap) {
       while (!messageHeap.isEmpty()) {
         String request = messageHeap.removeFromQueue();
@@ -55,30 +54,26 @@ public class Server {
         String time = fields[2];
         String username = fields[3];
 
-        
-
         if (tag.equals("message")) {
           String response = msg.contains("@Server") ? msg : username + ": " + msg;
           broadCast(Utility.formmatPayload("message", response, time));
-
         } else if (tag.equals("disconnect")) {
           String leftTime = Utility.getCurrentTime();
           synchronizedMap.get(username).sendMessage(Utility.formmatPayload("disconnect", "@Server: Goodbye!", leftTime));
           synchronizedMap.get(username).close();
           synchronizedMap.remove(username);
           broadCast(Utility.formmatPayload("message", "@Server: " + username + " has left the chat!", leftTime));
-
         }
-
       }
     }
+
     try {
       Thread.sleep(100); // wait for 100 milliseconds before checking the list again
     } catch (InterruptedException e) {
+      // Exception handling for thread interruption
       e.printStackTrace();
     }
   }
-
 
   public void closeServer() {
     try {
@@ -86,10 +81,10 @@ public class Server {
         serverSocket.close();
       }
     } catch (IOException e) {
+      // Exception handling for IO errors
       e.printStackTrace();
     }
   }
-
 
   public static void main(String[] args) {
     try {
@@ -114,9 +109,9 @@ public class Server {
 
       // Start the process thread
       processThread.start();
-
     } catch (IOException e) {
-      System.out.print("Hey");
+      // Exception handling for IO errors
+      e.printStackTrace();
     }
   }
 }

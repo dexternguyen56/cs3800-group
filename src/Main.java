@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,25 +22,45 @@ public class Main extends Application {
 
   private TextArea chatArea;
   private ArrayList<String> chatMessages = new ArrayList<>();
-  private boolean promptTextFlag = false;
-  TextField messageField;
-  String message = "";
-  Button sendButton;
-  String userName;
-  String promptText = "Enter your message here...";
+  private TextField messageField;
+  private Button sendButton;
 
-  private Stage localStage;
+  private String userName;
+  private String promptText = "Enter your message here...";
+  
+  private String demoName;
+
 
   public static final Integer PORT_NUMBER = 1234;
   public static final String HOST_NAME = "localhost";
+
   private Socket socket;
   private BufferedReader bufferedReader;
   private BufferedWriter bufferedWriter;
 
+
+  public Main(String name){
+    demoName = name;
+  
+  }
+
+  public void demoName(){
+
+    sendMessage(demoName, "");
+
+  }
+
+  public void demoMessages(){
+
+    for  (int i = 1; i <= 5; i++) {
+      sendMessage(Integer.toString(i), "tag");
+    }
+
+  }
+
   @Override
   public void start(Stage primaryStage) {
     try {
-      localStage = primaryStage;
 
       // Create the UI components
       BorderPane root = new BorderPane();
@@ -135,7 +153,17 @@ public class Main extends Application {
     sendButton.setDisable(true);
   }
 
-  //Client
+  public TextField getMessageField() {
+    return messageField;
+  }
+
+public Button getSendButton() {
+    return sendButton;
+}
+
+
+
+  //NOTE: Socket 
 
   private void initializeClient(String host, Integer port) {
     try {
@@ -144,6 +172,7 @@ public class Main extends Application {
         new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
       this.bufferedReader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    
     } catch (IOException e) {
       System.out.println("Unable to connect to server at " + host + ":" + port);
       updateChatBox("Unable to connect to server!");
@@ -152,7 +181,7 @@ public class Main extends Application {
     }
   }
 
-  public void sendMessage(String message, String tag) {
+  public synchronized void sendMessage(String message, String tag) {
     String response;
     try {
       if (socket.isConnected()) {
@@ -250,4 +279,6 @@ public class Main extends Application {
   public static void main(String[] args) {
     launch(args);
   }
+
+
 }
