@@ -165,7 +165,7 @@ public class Main extends Application {
             message = (userName == null) ? "["+message+"]" : message;
           }
 
-          response = payload(tag, message, getTime());
+          response = Utility.formmatPayload(tag, message, Utility.getCurrentTime());
 
           bufferedWriter.write(response);
           bufferedWriter.newLine();
@@ -199,7 +199,9 @@ public class Main extends Application {
 
     String tag = fields[0];
     String msg = fields[1];
-    String time = fields[2];
+    String rawTime = fields[2];
+
+    String time = Utility.formatTime(Utility.stringToLocalDateTime(rawTime));
 
     if (tag.equals("disconnect")) {
       updateChatBox(time + msg);
@@ -244,20 +246,6 @@ public class Main extends Application {
     }
   }
 
-  public String payload(String tag, String msg, String time) {
-    String[] response = { tag, msg, time };
-
-    return String.join(",", response);
-  }
-
-  public String getTime() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-      "[hh:mm:ss a]"
-    );
-
-    return "["+ now.format(formatter) +"] ";
-  }
 
   public static void main(String[] args) {
     launch(args);

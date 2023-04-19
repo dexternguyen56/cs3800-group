@@ -15,12 +15,12 @@ public class ClientHandler implements Runnable {
   private String username;
 
   private Socket socket;
-  private List msgList; 
+  private TimeHeap msgList; 
   private Map userMap;
   private String request;
 
   
-  public ClientHandler (Socket socket, List msgList,  Map userName){
+  public ClientHandler (Socket socket, TimeHeap msgList,  Map userName){
     try{
       this.socket = socket;
       this.msgList = msgList;
@@ -29,7 +29,7 @@ public class ClientHandler implements Runnable {
       this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
       this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-      sendMessage(payload("username", "@Server: Enter your username" , getTime()));
+      sendMessage(Utility.formmatPayload("username", "@Server: Enter your username" , Utility.getCurrentTime()));
           
     } catch(IOException e) {
       close();
@@ -60,8 +60,17 @@ public class ClientHandler implements Runnable {
                 msgFromClient = bufferedReader.readLine();
                 System.out.println("Request: " +msgFromClient);
 
+                String fields[] = msgFromClient.split(",");
+
+                String tag = fields[0];
+                String msg = fields[1];
+                String time = fields[2];
+
+                LocalDateTime convertedTime = Utility.stringToLocalDateTime(time);
+            
+                
                 if (username != null){
-                  msgList.add(msgFromClient + "," + username);
+                  msgList.addToQueue(convertedTime,msgFromClient + "," + username);
                 }
                 else{
                   processUsername(msgFromClient); 
@@ -86,27 +95,18 @@ public class ClientHandler implements Runnable {
         username = msg;
         userMap.put(username, this);
 
-        sendMessage(payload("username", msg , time));
-        msgList.add(payload("message", "@Server: " + username + " has join the chat!", time) +  "," + username);
+        sendMessage(Utility.formmatPayload("username", msg , time));
+        msgList.addToQueue(LocalDateTime.now(), Utility.formmatPayload("message", "@Server: " + username + " has join the chat!", time) +  "," + username);
 
       }
       else{
-        sendMessage(payload("username", "@Server: Enter a different username" , getTime()));
+        sendMessage(Utility.formmatPayload("username", "@Server: Enter a different username" , Utility.getCurrentTime()));
       }
 
     }
 
   }
 
-
-  public String getTime() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-      "[hh:mm:ss a]"
-    );
-
-    return "["+ now.format(formatter) +"] ";
-  }
 
   
 
@@ -129,11 +129,6 @@ public void close(){
   }
 }
 
-  public String payload(String tag, String msg,  String time ){
-    String []response = {tag,msg,time};
-    return String.join(",", response);
-
-  }
 
 
   @Override

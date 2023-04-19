@@ -13,7 +13,9 @@ import java.util.Map;
 public class Server {
   private ServerSocket serverSocket;
 
-  List<String> synchronizedList = Collections.synchronizedList(new ArrayList<String>());
+  //List<String> messageHeap = Collections.messageHeap(new ArrayList<String>());
+
+  TimeHeap messageHeap = new TimeHeap();
 
   // Creating synchronized hashmap
   Map<String, ClientHandler> synchronizedMap = Collections.synchronizedMap(new HashMap<String, ClientHandler>());
@@ -28,7 +30,7 @@ public class Server {
         Socket socket = serverSocket.accept();
         System.out.println("A new user has joined");
 
-        ClientHandler clientHandler = new ClientHandler(socket, synchronizedList, synchronizedMap);
+        ClientHandler clientHandler = new ClientHandler(socket, messageHeap, synchronizedMap);
         Thread thread = new Thread(clientHandler);
         thread.start();
 
@@ -50,9 +52,9 @@ public class Server {
 
   public void processResponse() {
 
-    synchronized (synchronizedList) {
-      while (!synchronizedList.isEmpty()) {
-        String request = synchronizedList.remove(0);
+    synchronized (messageHeap) {
+      while (!messageHeap.isEmpty()) {
+        String request = messageHeap.removeFromQueue();
 
         String fields[] = request.split(",");
         String tag = fields[0];
@@ -64,14 +66,14 @@ public class Server {
 
         if (tag.equals("message")) {
           String response = msg.contains("@Server") ? msg : username + ": " + msg;
-          broadCast(payload("message", response, time));
+          broadCast(Utility.formmatPayload("message", response, time));
 
         } else if (tag.equals("disconnect")) {
-          String leftTime = getTime();
-          synchronizedMap.get(username).sendMessage(payload("disconnect", "@Server: Goodbye!", leftTime));
+          String leftTime = Utility.getCurrentTime();
+          synchronizedMap.get(username).sendMessage(Utility.formmatPayload("disconnect", "@Server: Goodbye!", leftTime));
           synchronizedMap.get(username).close();
           synchronizedMap.remove(username);
-          broadCast(payload("message", "@Server: " + username + " has left the chat!", leftTime));
+          broadCast(Utility.formmatPayload("message", "@Server: " + username + " has left the chat!", leftTime));
 
         }
 
@@ -84,11 +86,6 @@ public class Server {
     }
   }
 
-  public String payload(String tag, String msg, String time) {
-    String[] response = { tag, msg, time };
-    return String.join(",", response);
-
-  }
 
   public void closeServer() {
     try {
@@ -100,13 +97,6 @@ public class Server {
     }
   }
 
-  public String getTime() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-        "[hh:mm:ss a]");
-
-    return "[" + now.format(formatter) + "] ";
-  }
 
   public static void main(String[] args) {
     try {
