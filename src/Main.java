@@ -27,9 +27,9 @@ public class Main extends Application {
 
   private String userName;
   private String promptText = "Enter your message here...";
-  
-  private String demoName;
 
+  private String demoName;
+  private Boolean demo = false;
 
   public static final Integer PORT_NUMBER = 1234;
   public static final String HOST_NAME = "localhost";
@@ -38,37 +38,35 @@ public class Main extends Application {
   private BufferedReader bufferedReader;
   private BufferedWriter bufferedWriter;
 
-
-  public Main(String name){
+  public Main(String name) {
     demoName = name;
-  
   }
 
-  public void demoName(){
+  public Main() {}
 
+  public void demoName() {
     sendMessage(demoName, "");
-
   }
 
-  public void demoMessages(){
-
-    for  (int i = 1; i <= 5; i++) {
+  public void demoMessages() {
+    demo = true;
+    for (int i = 1; i <= 5; i++) {
       sendMessage(Integer.toString(i), "tag");
     }
-
   }
+
+  //DEMO
 
   @Override
   public void start(Stage primaryStage) {
     try {
-
       // Create the UI components
       BorderPane root = new BorderPane();
       chatArea = new TextArea();
       chatArea.setEditable(false);
       chatArea.setFocusTraversable(false);
       chatArea.getStyleClass().add("chat-area");
-  
+
       messageField = new TextField();
       messageField.getStyleClass().add("message-field");
       messageField.setPromptText(promptText);
@@ -106,19 +104,27 @@ public class Main extends Application {
       initializeClient(HOST_NAME, PORT_NUMBER);
       startClient();
 
-
       // Event for chatArea
-      chatArea.textProperty().addListener((observable, oldText, newText) -> {
-        if(userName != null){
-          String title = userName.replace("[", "").replace("]", "");
-          primaryStage.setTitle(title);
-        }
-      
-    });
+      chatArea
+        .textProperty()
+        .addListener((observable, oldText, newText) -> {
+          if (userName != null) {
+            String title = userName.replace("[", "").replace("]", "");
+            primaryStage.setTitle(title);
+          }
+        });
+
+      //Even when the message field is clicked: DEMO
+      messageField.setOnMouseClicked(event -> {
+        demo = false;
+      });
 
       // Event handler for messageField to handle the Enter key
       messageField.setOnKeyPressed(event -> {
         if (event.getCode() == KeyCode.ENTER) {
+          //DEMO
+          demo = false;
+
           sendMessage(messageField.getText(), "tag");
           Platform.runLater(() -> {
             messageField.clear();
@@ -128,6 +134,9 @@ public class Main extends Application {
 
       // Event handler for sendButton
       sendButton.setOnAction(event -> {
+        //DEMO
+        demo = false;
+
         sendMessage(messageField.getText(), "tag");
         Platform.runLater(() -> {
           messageField.clear();
@@ -139,16 +148,14 @@ public class Main extends Application {
   }
 
   private void updateChatBox(String message) {
-    
     // Update chat box
     Platform.runLater(() -> {
       chatArea.appendText(message + "\n");
     });
   }
 
-  // Disable button and 
+  // Disable button and
   public void signOff() {
-  
     messageField.setDisable(true);
     sendButton.setDisable(true);
   }
@@ -157,13 +164,11 @@ public class Main extends Application {
     return messageField;
   }
 
-public Button getSendButton() {
+  public Button getSendButton() {
     return sendButton;
-}
+  }
 
-
-
-  //NOTE: Socket 
+  //NOTE: Socket
 
   private void initializeClient(String host, Integer port) {
     try {
@@ -172,7 +177,6 @@ public Button getSendButton() {
         new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
       this.bufferedReader =
         new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    
     } catch (IOException e) {
       System.out.println("Unable to connect to server at " + host + ":" + port);
       updateChatBox("Unable to connect to server!");
@@ -191,10 +195,11 @@ public Button getSendButton() {
           } else {
             tag = (userName == null) ? "username" : "message";
 
-            message = (userName == null) ? "["+message+"]" : message;
+            message = (userName == null) ? "[" + message + "]" : message;
           }
 
-          response = Utility.formmatPayload(tag, message, Utility.getCurrentTime());
+          response =
+            Utility.formmatPayload(tag, message, Utility.getCurrentTime());
 
           bufferedWriter.write(response);
           bufferedWriter.newLine();
@@ -212,7 +217,6 @@ public Button getSendButton() {
       while (socket.isConnected()) {
         if (bufferedReader.ready()) {
           msgFromGroupChat = bufferedReader.readLine();
-
           processResponse(msgFromGroupChat);
         }
       }
@@ -230,7 +234,9 @@ public Button getSendButton() {
     String msg = fields[1];
     String rawTime = fields[2];
 
-    String time = Utility.formatTime(Utility.stringToLocalDateTime(rawTime));
+    String time = demo
+      ? Utility.demoFormatTime(Utility.stringToLocalDateTime(rawTime))
+      : Utility.formatTime(Utility.stringToLocalDateTime(rawTime));
 
     if (tag.equals("disconnect")) {
       updateChatBox(time + msg);
@@ -275,10 +281,7 @@ public Button getSendButton() {
     }
   }
 
-
   public static void main(String[] args) {
     launch(args);
   }
-
-
 }

@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
+
   private ServerSocket serverSocket;
 
   TimeHeap messageHeap = new TimeHeap();
 
   // Creating synchronized hashmap
-  Map<String, ClientSocket> synchronizedMap = Collections.synchronizedMap(new HashMap<String, ClientSocket>());
+  Map<String, ClientSocket> synchronizedMap = Collections.synchronizedMap(
+    new HashMap<String, ClientSocket>()
+  );
 
   public Server(ServerSocket serverSocket) {
     this.serverSocket = serverSocket;
@@ -23,10 +26,13 @@ public class Server {
         Socket socket = serverSocket.accept();
         System.out.println("A new user has joined");
 
-        ClientSocket ClientSocket = new ClientSocket(socket, messageHeap, synchronizedMap);
+        ClientSocket ClientSocket = new ClientSocket(
+          socket,
+          messageHeap,
+          synchronizedMap
+        );
         Thread thread = new Thread(ClientSocket);
         thread.start();
-
       }
     } catch (IOException e) {
       // Exception handling for IO errors
@@ -55,14 +61,30 @@ public class Server {
         String username = fields[3];
 
         if (tag.equals("message")) {
-          String response = msg.contains("@Server") ? msg : username + ": " + msg;
+          String response = msg.contains("@Server")
+            ? msg
+            : username + ": " + msg;
           broadCast(Utility.formmatPayload("message", response, time));
         } else if (tag.equals("disconnect")) {
           String leftTime = Utility.getCurrentTime();
-          synchronizedMap.get(username).sendMessage(Utility.formmatPayload("disconnect", "@Server: Goodbye!", leftTime));
+          synchronizedMap
+            .get(username)
+            .sendMessage(
+              Utility.formmatPayload(
+                "disconnect",
+                "@Server: Goodbye!",
+                leftTime
+              )
+            );
           synchronizedMap.get(username).close();
           synchronizedMap.remove(username);
-          broadCast(Utility.formmatPayload("message", "@Server: " + username + " has left the chat!", leftTime));
+          broadCast(
+            Utility.formmatPayload(
+              "message",
+              "@Server: " + username + " has left the chat!",
+              leftTime
+            )
+          );
         }
       }
     }
